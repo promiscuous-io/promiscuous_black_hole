@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.email       = ['seligman.ben@gmail.com', 'kylessnell@gmail.com']
   s.summary     = 'Normalize and record all data published through promiscuous'
   s.description = 'Normalize and record all data published through promiscuous'
-  s.homepage    = 'https://github.com/crowdtap/normcore2'
+  s.homepage    = 'https://github.com/promiscuous-io/promiscuous_black_hole'
   s.license     = 'MIT'
 
   s.add_dependency 'pg'
