@@ -13,7 +13,9 @@ module Promiscuous::BlackHole
   def self.start
     connect
     ensure_embeddings_table
-    Promiscuous::CLI.new.subscribe
+    cli = Promiscuous::CLI.new
+    cli.options[:action] = :subscribe
+    cli.run
   end
 
   def self.subscribing_to?(collection)
