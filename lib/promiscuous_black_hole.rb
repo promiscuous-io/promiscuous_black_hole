@@ -13,7 +13,7 @@ module Promiscuous::BlackHole
     connect
     ensure_embeddings_table
     cli = Promiscuous::CLI.new
-    cli.options[:action] = :subscribe
+    cli.options = { :action => :subscribe }
     cli.run
   end
 
