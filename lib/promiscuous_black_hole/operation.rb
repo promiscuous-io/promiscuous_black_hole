@@ -1,6 +1,7 @@
 require 'newrelic_rpm'
 
 require 'promiscuous_black_hole/locker'
+require 'promiscuous_black_hole/message'
 require 'promiscuous_black_hole/record'
 require 'promiscuous_black_hole/stale_embeddings_destroyer'
 require 'promiscuous_black_hole/table'

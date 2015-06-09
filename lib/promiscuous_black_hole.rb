@@ -6,7 +6,6 @@ require 'sequel'
 
 require 'promiscuous_black_hole/config'
 require 'promiscuous_black_hole/db'
-require 'promiscuous_black_hole/worker'
 require 'promiscuous_black_hole/unit_of_work'
 
 module Promiscuous::BlackHole
