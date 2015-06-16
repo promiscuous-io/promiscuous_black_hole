@@ -13,7 +13,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'pg'
   s.add_dependency 'promiscuous'
   s.add_dependency 'sequel'
-  s.add_dependency 'newrelic_rpm'
 
   s.add_development_dependency 'bundler'
   s.add_development_dependency 'mongoid'
