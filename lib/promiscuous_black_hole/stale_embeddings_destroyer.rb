@@ -20,7 +20,7 @@ module Promiscuous::BlackHole
     end
 
     def child_tables
-      DB[:embeddings].where('parent_table = ?', @table_name).map(:child_table)
+      EMBEDDING_SET[:parent_table]
     end
 
     private

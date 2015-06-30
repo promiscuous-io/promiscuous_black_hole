@@ -32,12 +32,7 @@ module Promiscuous::BlackHole
         :parent_table => embedded_in_table,
         :child_table => table_name.to_s
       }
-
-      embedding = DB[:embeddings].where(attrs)
-
-      if embedding.first.nil?
-        DB[:embeddings].insert(attrs)
-      end
+      EMBEDDING_SET.add(attrs)
     end
 
     def embedded_in_table
