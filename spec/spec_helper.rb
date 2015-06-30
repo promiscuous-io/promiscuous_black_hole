@@ -7,7 +7,7 @@ require 'promiscuous_black_hole'
 
 DATABASE = 'promiscuous_black_hole_test'
 
-PROMISCUOUS_SPEC_SUPPORT_PATH = Gem::Specification.find_all_by_name('promiscuous').first.gem_dir + '/../spec/support/'
+PROMISCUOUS_SPEC_SUPPORT_PATH = Gem::Specification.find_all_by_name('promiscuous').first.gem_dir + '/spec/support/'
 
 DB = Promiscuous::BlackHole::DB
 
@@ -56,7 +56,6 @@ RSpec.configure do |config|
 
     run_subscriber_worker!
     DB.drop_table(*DB.tables)
-    Promiscuous::BlackHole.ensure_embeddings_table
   end
 
   config.after(:each) do

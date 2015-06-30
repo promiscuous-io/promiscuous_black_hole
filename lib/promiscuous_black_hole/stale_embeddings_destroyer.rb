@@ -20,7 +20,7 @@ module Promiscuous::BlackHole
     end
 
     def child_tables
-      EMBEDDING_SET[:parent_table]
+      EMBEDDING_SET[@table_name]
     end
 
     private

@@ -22,12 +22,18 @@ class EmbeddingSet
       false
     else
       DB[:embeddings].insert(attrs)
-      @data.add(embedding)
+      add_to_data(embedding)
       true
     end
   end
 
   private
+
+  def add_to_data(embedding)
+    parent = embedding[:parent_table]
+    @data[parent] ||= Set.new
+    @data[parent].add(embedding[:child_table])
+  end
 
   def ensure_embeddings_table
     DB.create_table?(:embeddings) do
@@ -40,11 +46,8 @@ class EmbeddingSet
   def load
     ensure_embeddings_table
 
-    @data = DB[:embeddings].inject({}) do |data, embedding|
-      parent = embedding[:parent_table]
-      data[parent] ||= Set.new
-      data[parent].add(embedding[:child_table])
-      data
+    DB[:embeddings].each do |embedding|
+      add_to_data(embedding)
     end
 
     @loaded = true
