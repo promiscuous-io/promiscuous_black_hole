@@ -22,6 +22,7 @@ module Promiscuous::BlackHole
         bust_cache
 
         create_embedding_metadata if embedded_in_table
+
         ensure_created
         ensure_columns
       end
