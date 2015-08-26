@@ -82,4 +82,19 @@ describe Promiscuous::BlackHole do
       expect(extract_array('publisher_model', 'group')).to eq([Date.new(2015, 2, 10)])
     end
   end
+
+  it 'correctly handles complex table names' do
+    define_constant :'PublisherModel::Base' do
+      include Mongoid::Document
+      include Promiscuous::Publisher
+      field :groups
+      publish :groups
+    end
+
+    PublisherModel::Base.create!(:groups => ['2014-10-10', '2013-10-10', '2013-10-11'])
+
+    eventually do
+      expect(DB.table_exists?(:'publisher_model$groups')).to eq(true)
+    end
+  end
 end

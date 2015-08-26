@@ -56,7 +56,7 @@ module Promiscuous::BlackHole
       end
 
       def self.from_value(key, value, parent_message)
-        message_payload = { 'types' =>["#{parent_message.base_type}$#{ key }"] }
+        message_payload = { 'types' =>["#{parent_message.table_name.singularize}$#{ key }"] }
         value.map do |element|
           custom_attrs = { 'attributes' => { key.singularize => element }, 'id' => BSON::ObjectId.new.to_s }
           EmbeddedMessage.new(message_payload.merge(custom_attrs), parent_message)
