@@ -18,9 +18,8 @@ module Promiscuous::BlackHole
 
     def embedded_messages
       @embedded_messages ||= safe_raw_attributes
-        .values
-        .select   { |v| EmbeddedMessage.embedded_value?(v) }
-        .flat_map { |v| EmbeddedMessage.from_embedded_value(v, self)}
+        .select   { |k, v| EmbeddedMessage.embedded_value?(v) }
+        .flat_map { |k, v| EmbeddedMessage.from_embedded_value(k, v, self)}
     end
 
     def table_name

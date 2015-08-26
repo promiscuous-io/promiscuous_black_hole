@@ -104,7 +104,6 @@ describe Promiscuous::BlackHole do
         Promiscuous::BlackHole::Record.new('publisher_models', attrs).upsert
       end
 
-
       PublisherModel.create!(:embedded_publishers => [ EmbeddedPublisher.new(:field_1 => 3)])
 
       sleep 0.2

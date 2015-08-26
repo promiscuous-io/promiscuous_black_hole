@@ -2,7 +2,7 @@ module Promiscuous::BlackHole
   module DB
     def self.connection
       @@connection ||= Sequel.postgres(Config.connection_args.merge(:max_connections => 10)).tap do |conn|
-        conn.extension :pg_json, :pg_array
+        conn.extension :pg_json
       end
     end
 

@@ -1,18 +1,13 @@
+require 'bson'
+
 module Promiscuous::BlackHole
   class EmbeddedMessage < Message
     def self.embedded_value?(value)
-      value.kind_of?(Hash) && (
-        value['types'] == ['Promiscuous::EmbeddedDocs'] ||                 # format for embeds_many embeddings
-        ['types', 'id', 'attributes'].all? { |attr| attr.in?(value.keys) } # format for embeds_one_embeddings
-      )
+      PARSERS.any? { |parser| parser.matching_embedding?(value) }
     end
 
-    def self.from_embedded_value(value, parent_message)
-      if value['types'] == ['Promiscuous::EmbeddedDocs']
-        value['attributes'].map { |attr| new(attr, parent_message) } # format for embeds_many embeddings
-      else
-        [ new(value, parent_message) ]                               # format for embeds_one embeddings
-      end
+    def self.from_embedded_value(key, value, parent_message)
+      PARSERS.detect { |parser| parser.matching_embedding?(value) }.from_value(key, value, parent_message)
     end
 
     def initialize(raw_message, embedding_message)
@@ -34,5 +29,41 @@ module Promiscuous::BlackHole
     private
 
     attr_reader :embedding_message
+
+    module EmbedsManyParser
+      def self.matching_embedding?(value)
+        value.kind_of?(Hash) && value['types'] == ['Promiscuous::EmbeddedDocs']
+      end
+
+      def self.from_value(_, value, parent_message)
+        value['attributes'].map { |attr| EmbeddedMessage.new(attr, parent_message) }
+      end
+    end
+
+    module EmbedsOneParser
+      def self.matching_embedding?(value)
+        value.kind_of?(Hash) && ['types', 'id', 'attributes'].all? { |attr| attr.in?(value.keys) }
+      end
+
+      def self.from_value(_, value, parent_message)
+        [ EmbeddedMessage.new(value, parent_message) ]
+      end
+    end
+
+    module ArrayFieldParser
+      def self.matching_embedding?(value)
+        value.kind_of?(Array)
+      end
+
+      def self.from_value(key, value, parent_message)
+        message_payload = { 'types' =>["#{parent_message.base_type}$#{ key }"] }
+        value.map do |element|
+          custom_attrs = { 'attributes' => { key.singularize => element }, 'id' => BSON::ObjectId.new.to_s }
+          EmbeddedMessage.new(message_payload.merge(custom_attrs), parent_message)
+        end
+      end
+    end
+
+    PARSERS = [ EmbedsManyParser, EmbedsOneParser, ArrayFieldParser ]
   end
 end

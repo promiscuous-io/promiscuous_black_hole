@@ -21,8 +21,6 @@ module Promiscuous::BlackHole
 
     def sql_representation_for(value)
       case value
-      when Array
-        Sequel.pg_array(value.map { |el| sql_representation_for(el) }, type_for(value.first).to_sym)
       when Hash
         Sequel.pg_json(value)
       else

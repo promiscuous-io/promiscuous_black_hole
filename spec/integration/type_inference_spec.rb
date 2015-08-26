@@ -125,14 +125,6 @@ describe Promiscuous::BlackHole do
     end
   end
 
-  context 'when a new field is an array' do
-    it_should_behave_like 'adding a column' do
-      let(:input_value)      { [nil, '2014-10-10'] }
-      let(:expected_db_type) { 'date[]' }
-      let(:indexed)          { false }
-    end
-  end
-
   context 'when a new field is json' do
     it_should_behave_like 'adding a column' do
       let(:input_value)      { { :some => { :crazy => :hash } } }
