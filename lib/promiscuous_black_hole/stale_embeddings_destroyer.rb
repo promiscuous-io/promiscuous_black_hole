@@ -21,11 +21,14 @@ module Promiscuous::BlackHole
     end
 
     def child_tables
-      criteria = DB[:embeddings].where('parent_table = ?', @table_name)
-      @cached_embeddings[criteria.sql.hash] ||= criteria.map(:child_table)
+      @cached_embeddings[@table_name] ||= fetch_child_tables
     end
 
     private
+
+    def fetch_child_tables
+      DB[:embeddings].where('parent_table = ?', @table_name).map(:child_table)
+    end
 
     def criteria_for(table)
       DB[table].where('embedded_in_id = ?', @parent_id)
