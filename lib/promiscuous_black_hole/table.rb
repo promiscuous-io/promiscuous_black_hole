@@ -1,9 +1,8 @@
 require 'promiscuous_black_hole/locker'
+require 'promiscuous_black_hole/type_inferrer'
 
 module Promiscuous::BlackHole
   class Table
-    include TypeInferrer
-
     def initialize(table_name, instance_attrs)
       @table_name     = table_name.to_sym
       @instance_attrs = instance_attrs
@@ -72,7 +71,7 @@ module Promiscuous::BlackHole
           indexed_columns << attr
           [attr.to_sym, :char, { :size => 24 }]
         else
-          type = type_for(val)
+          type = TypeInferrer.type_for(val)
           if type.in?([:date, :timestamptz])
             indexed_columns << attr
           end

@@ -1,13 +1,10 @@
-require 'promiscuous_black_hole/type_inferrer'
 require 'promiscuous_black_hole/eventual_destroyer'
 
 module Promiscuous::BlackHole
   class Record
-    include TypeInferrer
-
-    def initialize(table_name, attributes)
+    def initialize(table_name, raw_attributes)
       @table_name = table_name
-      @attributes = attributes
+      @raw_attributes = raw_attributes
     end
 
     def upsert
@@ -26,7 +23,7 @@ module Promiscuous::BlackHole
 
     private
 
-    attr_reader :table_name, :attributes
+    attr_reader :table_name
 
     def existing_record
       @existing_record ||= criteria.first
@@ -34,18 +31,23 @@ module Promiscuous::BlackHole
 
     def update
       Promiscuous.debug "Updating record: [ #{attributes} ]"
-      criteria.update(formatted_attributes)
+      criteria.update(attributes)
     end
 
     def create
       Promiscuous.debug "Creating record: #{attributes.values}"
-      DB[table_name].insert(formatted_attributes)
+      DB[table_name].insert(attributes)
     end
 
-    def formatted_attributes
-      attrs = {}
-      attributes.each { |k, v| attrs[k] = sql_representation_for(v) }
-      attrs
+    def attributes
+      return @attributes if @attributes
+
+      @attributes = @raw_attributes.dup
+      @attributes.each do |k, v|
+        if v.is_a?(Hash)
+          @attributes[k] = MultiJson.dump(v)
+        end
+      end
     end
 
     def criteria

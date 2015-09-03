@@ -55,7 +55,7 @@ describe Promiscuous::BlackHole do
     end
   end
 
-  context 'when a new fiend ends in _id but is not a BSON' do
+  context 'when a new field ends in _id but is not a BSON' do
     it 'correctly type casts strings' do
       PublisherModel.create!(:other_collection_id => 'abcd_1234')
 
@@ -72,7 +72,7 @@ describe Promiscuous::BlackHole do
       eventually do
         column = schema_hash_for(:publisher_models)[:other_collection_id]
 
-        expect(column[:db_type]).to eq('json')
+        expect(column[:db_type]).to eq('text')
       end
     end
   end
@@ -128,7 +128,7 @@ describe Promiscuous::BlackHole do
   context 'when a new field is json' do
     it_should_behave_like 'adding a column' do
       let(:input_value)      { { :some => { :crazy => :hash } } }
-      let(:expected_db_type) { 'json' }
+      let(:expected_db_type) { 'text' }
       let(:indexed)          { false }
     end
   end

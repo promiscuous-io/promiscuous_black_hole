@@ -70,7 +70,7 @@ describe Promiscuous::BlackHole do
     PublisherModel.create!(:groups => [{'keys' => 'and values'}, { 'more keys' => 'and values' }])
 
     eventually do
-      expect(extract_array('publisher_model', 'group')).to eq([{ 'keys' => 'and values' }, { 'more keys' => 'and values' }])
+      expect(extract_array('publisher_model', 'group')).to eq(["{\"keys\":\"and values\"}", "{\"more keys\":\"and values\"}"])
     end
   end
 
