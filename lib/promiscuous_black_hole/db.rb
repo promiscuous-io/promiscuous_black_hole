@@ -32,10 +32,12 @@ module Promiscuous::BlackHole
     end
 
     def self.ensure_embeddings_table
-      DB.create_table?(:embeddings) do
-        primary_key [:parent_table, :child_table], :name => :embeddings_pk
-        column :parent_table, 'varchar(255)'
-        column :child_table, 'varchar(255)'
+      Locker.new('embeddings').with_lock do
+        DB.create_table?(:embeddings) do
+          primary_key [:parent_table, :child_table], :name => :embeddings_pk
+          column :parent_table, 'varchar(255)'
+          column :child_table, 'varchar(255)'
+        end
       end
     end
 
