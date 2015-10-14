@@ -32,6 +32,7 @@ module Promiscuous::BlackHole
     end
 
     def self.ensure_embeddings_table
+      return if table_exists?(:embeddings)
       Locker.new('embeddings').with_lock do
         DB.create_table?(:embeddings) do
           primary_key [:parent_table, :child_table], :name => :embeddings_pk
