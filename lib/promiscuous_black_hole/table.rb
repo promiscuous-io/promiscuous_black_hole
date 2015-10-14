@@ -36,7 +36,9 @@ module Promiscuous::BlackHole
       embedding = DB[:embeddings].where(attrs)
 
       if embedding.first.nil?
-        DB[:embeddings].insert(attrs)
+        Locker.new('embeddings').with_lock do
+          DB[:embeddings].insert(attrs) if embedding.first.nil?
+        end
       end
     end
 
