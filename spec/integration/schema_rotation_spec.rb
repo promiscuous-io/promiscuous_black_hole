@@ -6,8 +6,8 @@ describe Promiscuous::BlackHole do
       cfg.schema_generator = -> { @expected_schema_name }
     end
 
-    [Time.now, Time.now + 1.hour].each do |time_str|
-      @expected_schema_name = Time.now.beginning_of_hour.to_i.to_s
+    [Time.now, Time.now + 1.hour].each do |time|
+      @expected_schema_name = time.beginning_of_hour.to_i.to_s
       PublisherModel.create!
 
       eventually do
@@ -15,6 +15,24 @@ describe Promiscuous::BlackHole do
           expect(DB[:publisher_models].count).to eq 1
         end
       end
+    end
+  end
+
+  it 'deletes from the right schema' do
+    Promiscuous::BlackHole::Config.configure do |cfg|
+      cfg.schema_generator = -> { @expected_schema_name }
+    end
+
+    Promiscuous::Config.destroy_timeout = 1.second
+
+    @expected_schema_name = 'foo'
+    m = PublisherModel.create!(:group => 3)
+    m.destroy
+    sleep 0.3
+    @expected_schema_name = 'bar'
+
+    eventually do
+      expect(DB[:foo__publisher_models].count).to eq(0)
     end
   end
 

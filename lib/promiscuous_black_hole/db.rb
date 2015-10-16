@@ -20,6 +20,10 @@ module Promiscuous::BlackHole
       connection.create_table(table, &block) unless table_exists?(table)
     end
 
+    def self.search_path
+      fetch('show search_path').first[:search_path]
+    end
+
     def self.schema_exists?(schema)
       exists = connection[<<-sql]
         SELECT EXISTS (
