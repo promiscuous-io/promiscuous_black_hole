@@ -18,6 +18,19 @@ describe Promiscuous::BlackHole do
     end
   end
 
+  it 'reads and writes the embeddings table from the public schema' do
+    Promiscuous::BlackHole::Config.configure do |cfg|
+      cfg.schema_generator = -> { 'bonanza' }
+    end
+
+    PublisherModel.create!
+
+    eventually do
+      expect(DB.tables).to include(:embeddings)
+      expect(DB.tables(:schema => 'bonanza')).not_to include(:embeddings)
+    end
+  end
+
   it 'deletes from the right schema' do
     Promiscuous::BlackHole::Config.configure do |cfg|
       cfg.schema_generator = -> { @expected_schema_name }

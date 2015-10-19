@@ -40,7 +40,7 @@ def clear_data
     DB.run("DROP SCHEMA \"#{schema}\" CASCADE")
   end
   DB.drop_table(*DB.tables)
-  Promiscuous::BlackHole::DB.ensure_embeddings_table
+  Promiscuous::BlackHole::EmbeddingsTable.ensure_exists
 end
 
 RSpec.configure do |config|

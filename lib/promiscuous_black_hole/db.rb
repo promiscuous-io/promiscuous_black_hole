@@ -4,16 +4,8 @@ module Promiscuous::BlackHole
       @@connection ||= Sequel.postgres(Config.connection_args.merge(:max_connections => 10))
     end
 
-    def self.table_exists?(table)
-      exists = connection[<<-sql]
-        SELECT EXISTS (
-          SELECT 1
-          FROM   information_schema.tables
-          WHERE  table_name = '#{table}'
-          AND    table_schema = ANY (CURRENT_SCHEMAS(false))
-        );
-      sql
-      exists.first[:exists]
+    def self.table_exists?(table, opts = {})
+      DB.tables(opts).include?(table.to_sym)
     end
 
     def self.create_table?(table, &block)
@@ -35,17 +27,6 @@ module Promiscuous::BlackHole
       exists.first[:exists]
     end
 
-    def self.ensure_embeddings_table
-      return if table_exists?(:embeddings)
-      Locker.new('embeddings').with_lock do
-        DB.create_table?(:embeddings) do
-          primary_key [:parent_table, :child_table], :name => :embeddings_pk
-          column :parent_table, 'varchar(255)'
-          column :child_table, 'varchar(255)'
-        end
-      end
-    end
-
     def self.transaction_with_applied_schema(name=nil, &block)
       if in_transaction?
         yield
@@ -56,7 +37,6 @@ module Promiscuous::BlackHole
         end
         transaction do
           DB << "SET LOCAL search_path TO #{name}"
-          ensure_embeddings_table
           yield
         end
       end

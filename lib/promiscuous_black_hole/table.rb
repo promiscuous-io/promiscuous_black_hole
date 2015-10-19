@@ -33,11 +33,11 @@ module Promiscuous::BlackHole
         :child_table => table_name.to_s
       }
 
-      embedding = DB[:embeddings].where(attrs)
+      embedding = EmbeddingsTable.where(attrs)
 
       if embedding.first.nil?
         Locker.new('embeddings').with_lock do
-          DB[:embeddings].insert(attrs) if embedding.first.nil?
+          EmbeddingsTable.insert(attrs) if embedding.first.nil?
         end
       end
     end

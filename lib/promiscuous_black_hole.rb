@@ -7,10 +7,12 @@ require 'sequel'
 require 'promiscuous_black_hole/config'
 require 'promiscuous_black_hole/db'
 require 'promiscuous_black_hole/unit_of_work'
+require 'promiscuous_black_hole/embeddings_table'
 
 module Promiscuous::BlackHole
   def self.start
     connect
+    EmbeddingsTable.ensure_exists
     cli = Promiscuous::CLI.new
     cli.options = { :action => :subscribe }
     cli.run

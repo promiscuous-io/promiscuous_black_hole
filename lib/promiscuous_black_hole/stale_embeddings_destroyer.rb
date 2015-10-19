@@ -27,7 +27,7 @@ module Promiscuous::BlackHole
     private
 
     def fetch_child_tables
-      DB[:embeddings].where('parent_table = ?', @table_name).map(:child_table)
+      EmbeddingsTable.where('parent_table = ?', @table_name).map(:child_table)
     end
 
     def criteria_for(table)
