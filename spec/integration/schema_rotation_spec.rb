@@ -18,16 +18,50 @@ describe Promiscuous::BlackHole do
     end
   end
 
-  it 'reads and writes the embeddings table from the public schema' do
-    Promiscuous::BlackHole::Config.configure do |cfg|
-      cfg.schema_generator = -> { 'bonanza' }
+  describe 'handling embeddings' do
+    before do
+      $schema_name = 'public'
+      Promiscuous::BlackHole::Config.configure do |cfg|
+        cfg.schema_generator = -> { $schema_name}
+      end
     end
 
-    PublisherModel.create!
+    after { $schema_name = nil }
 
-    eventually do
-      expect(DB.tables).to include(:embeddings)
-      expect(DB.tables(:schema => 'bonanza')).not_to include(:embeddings)
+    it 'reads and writes the embeddings table from the public schema' do
+      $schema_name = 'anything'
+
+      PublisherModel.create!
+
+      eventually do
+        expect(DB.tables).to include(:embeddings)
+        expect(DB.tables(:schema => 'anything')).not_to include(:embeddings)
+      end
+    end
+
+    it 'ignores embeddings that do not exist for the current schema' do
+      $schema_name = 'anything'
+
+      class PublisherModel
+        embeds_one :embedded_publishers
+        publish :embedded_publishers
+      end
+
+      define_constant :EmbeddedPublisher do
+        include Mongoid::Document
+        include Promiscuous::Publisher
+        embedded_in :publisher_model
+      end
+
+      PublisherModel.create!(:embedded_publishers => EmbeddedPublisher.new)
+
+      sleep 0.1
+      $schema_name = 'new_schema'
+      PublisherModel.create!
+
+      eventually do
+        expect(DB[:new_schema__publisher_models].count).to eq(1)
+      end
     end
   end
 
