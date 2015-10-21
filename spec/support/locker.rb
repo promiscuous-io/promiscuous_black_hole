@@ -7,7 +7,6 @@ module LockerHelper
     block.call
     self.block_time = 0
   end
-
 end
 
 Promiscuous::BlackHole::Locker.class_eval do
