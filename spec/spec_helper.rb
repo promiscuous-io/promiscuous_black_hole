@@ -26,7 +26,9 @@ end
 def reload_configuration
   use_real_backend { |c|
     c.subscriber_threads = 2
-    # c.logger = Logger.new(STDOUT).tap {|l| l.level = Logger::INFO }
+    if ENV['LOGGER_LEVEL']
+      c.logger = Logger.new(STDOUT).tap { |l| l.level = ENV['LOGGER_LEVEL'].to_i }
+    end
   }
 
   Promiscuous::BlackHole::Config.configure do |config|
