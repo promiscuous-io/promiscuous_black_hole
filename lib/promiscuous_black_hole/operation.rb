@@ -35,17 +35,28 @@ module Promiscuous::BlackHole
       end
     end
 
+    def schema_changed?
+      table.schema_changed? || embedded_operations.any?(&:schema_changed?)
+    end
+
     private
 
     attr_reader :message
 
+    def in_transaction(&block)
+      DB.transaction_with_applied_schema(schema, &block)
+    end
+
+    def schema
+      @schema ||= Config.schema_generator.call
+    end
+
     def process!
-      Locker.new(message.id).with_lock do
-        DB.transaction_with_applied_schema do
-          update_schema
-          persist
-        end
+      if in_transaction { schema_changed? }
+        Locker.new(message.table_name.to_s).with_lock { in_transaction { update_schema } }
       end
+
+      Locker.new(message.id).with_lock { in_transaction { persist } }
     end
 
     def upsert
