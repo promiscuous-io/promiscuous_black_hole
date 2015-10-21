@@ -9,23 +9,21 @@ module Promiscuous::BlackHole
     end
 
     def update_schema
-      update_schema! if schema_changed?
+      bust_cache
+
+      create_embedding_metadata if embedded_in_table
+
+      ensure_created
+      ensure_columns
+    end
+
+    def schema_changed?
+      !DB.table_exists?(table_name) || new_attrs.present?
     end
 
     private
 
     attr_reader :table_name, :instance_attrs
-
-    def update_schema!
-      Locker.new(table_name.to_s).with_lock do
-        bust_cache
-
-        create_embedding_metadata if embedded_in_table
-
-        ensure_created
-        ensure_columns
-      end
-    end
 
     def create_embedding_metadata
       attrs = {
@@ -44,10 +42,6 @@ module Promiscuous::BlackHole
 
     def embedded_in_table
       instance_attrs['embedded_in_table']
-    end
-
-    def schema_changed?
-      !DB.table_exists?(table_name) || new_attrs.present?
     end
 
     def ensure_columns
