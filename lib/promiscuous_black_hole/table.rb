@@ -91,6 +91,7 @@ module Promiscuous::BlackHole
         column :id, :char, :primary_key => true, :size => 24
         column :_v, :bigint
         column :_type, :varchar, :size => 255
+        column :_deleted, :boolean, :default => false unless Promiscuous::BlackHole::Config.hard_deletes?
 
         index :_type
       end

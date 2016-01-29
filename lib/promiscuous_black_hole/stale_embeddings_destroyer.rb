@@ -12,7 +12,11 @@ module Promiscuous::BlackHole
           StaleEmbeddingsDestroyer.new(child_table, id, @cached_embeddings).process
         end
 
-        criteria_for(child_table).delete
+        if Promiscuous::BlackHole::Config.hard_deletes?
+          criteria_for(child_table).delete
+        else
+          criteria_for(child_table).update(:_deleted => true)
+        end
       end
     end
 

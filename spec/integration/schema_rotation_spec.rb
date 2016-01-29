@@ -65,7 +65,7 @@ describe Promiscuous::BlackHole do
     end
   end
 
-  it 'deletes from the right schema' do
+  it 'deletes from the right schema when configured for hard deletes' do
     Promiscuous::BlackHole::Config.configure do |cfg|
       cfg.schema_generator = -> { @expected_schema_name }
     end

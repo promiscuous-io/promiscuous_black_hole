@@ -92,20 +92,32 @@ describe Promiscuous::BlackHole do
   end
 
   context 'when receiving a message with a delete operation' do
-    before do
-      Promiscuous::Config.destroy_timeout = 1.second
-      m = PublisherModel.create!(:group => 3)
-      m.destroy
+    context 'when configured for hard deletes' do
+      before do
+        Promiscuous::BlackHole::Config.delete_mode = :hard
+        m = PublisherModel.create!(:group => 3)
+        m.destroy
+      end
+
+      it 'deletes the record' do
+        eventually do
+          expect(DB[:publisher_models].count).to eq(0)
+        end
+      end
     end
 
-    it 'does not delete the record immediately' do
-      sleep 0.2
-      expect(DB[:publisher_models].count).to eq(1)
-    end
+    context 'when configured for soft deletes' do
+      before do
+        Promiscuous::BlackHole::Config.delete_mode = :soft
+        m = PublisherModel.create!(:group => 3)
+        m.destroy
+      end
 
-    it 'deletes the record after a timeout' do
-      eventually do
-        expect(DB[:publisher_models].count).to eq(0)
+      it 'marks the record for deletion' do
+        eventually do
+          expect(DB[:publisher_models].count).to eq(1)
+          expect(DB[:publisher_models].first[:_deleted]).to eq(true)
+        end
       end
     end
   end

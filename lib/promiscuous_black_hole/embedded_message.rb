@@ -16,10 +16,13 @@ module Promiscuous::BlackHole
     end
 
     def attributes
-      super.merge(
+      atts = super.merge(
         'embedded_in_id'    => embedding_message.id,
         'embedded_in_table' => embedding_message.table_name
       )
+
+      atts['_deleted'] = false unless Promiscuous::BlackHole::Config.hard_deletes?
+      atts
     end
 
     def operation

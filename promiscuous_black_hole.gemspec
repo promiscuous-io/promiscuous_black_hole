@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'bson'
 
   s.add_development_dependency 'bundler'
-  s.add_development_dependency 'mongoid'
+  s.add_development_dependency 'mongoid', '~> 4.0'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'rspec', '~> 3.0'
 

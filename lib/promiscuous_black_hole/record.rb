@@ -13,11 +13,16 @@ module Promiscuous::BlackHole
 
     def destroy
       Promiscuous.debug "Deleting record: #{ table_name }: #{ attributes['id'] }"
-      Promiscuous::Subscriber::Worker::EventualDestroyer.postpone_destroy(
-        schema_name: DB.search_path,
-        table_name: table_name,
-        id:  attributes['id']
-      )
+      if Promiscuous::BlackHole::Config.hard_deletes?
+        Promiscuous::Subscriber::Worker::EventualDestroyer.postpone_destroy(
+          schema_name: DB.search_path,
+          table_name: table_name,
+          id:  attributes['id']
+        )
+      else
+        attributes[:_deleted] = true
+        upsert
+      end
     end
 
     def message_version_newer_than_persisted?

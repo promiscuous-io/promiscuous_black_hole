@@ -6,18 +6,51 @@ describe Promiscuous::BlackHole do
       PublisherModel.create!
     end
 
-    it 'creates default columns' do
-      eventually do
-        columns = schema_hash_for(:publisher_models)
+    let(:columns) { schema_hash_for(:publisher_models) }
 
-        expected_columns = {
-          :_v    => { :db_type => 'bigint' },
-          :id    => { :db_type => 'character(24)', :primary_key => true },
-          :_type => { :db_type => 'character varying(255)' }
-        }
+    context 'when in soft delete mode' do
+      before do
+        Promiscuous::BlackHole::Config.delete_mode = :soft
+      end
 
-        expected_columns.each do |column_name, attrs|
-          expect(columns[column_name]).to include(attrs)
+      it 'creates default columns' do
+        eventually do
+          expected_columns = {
+            :_v => { :db_type => 'bigint' },
+            :id => { :db_type => 'character(24)', :primary_key => true },
+            :_type => { :db_type => 'character varying(255)' },
+            :_deleted => { :db_type => 'boolean', :default => 'false' }
+          }
+
+          expected_columns.each do |column_name, attrs|
+            expect(columns[column_name]).to include(attrs)
+          end
+        end
+      end
+    end
+
+    context 'when in hard delete mode' do
+      before do
+        Promiscuous::BlackHole::Config.delete_mode = :hard
+      end
+
+      it 'creates default columns' do
+        eventually do
+          expected_columns = {
+            :_v    => { :db_type => 'bigint' },
+            :id    => { :db_type => 'character(24)', :primary_key => true },
+            :_type => { :db_type => 'character varying(255)' }
+          }
+
+          expected_columns.each do |column_name, attrs|
+            expect(columns[column_name]).to include(attrs)
+          end
+        end
+      end
+
+      it 'does not create a deleted column' do
+        eventually do
+          expect(columns.keys).not_to include(:_deleted)
         end
       end
     end

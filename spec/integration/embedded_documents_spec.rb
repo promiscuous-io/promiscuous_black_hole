@@ -24,16 +24,16 @@ describe Promiscuous::BlackHole do
     end
   end
 
-  before do
+  let(:embedded_publishers) do
     more_embedded_publisher = MoreEmbeddedPublisher.new
 
-    embedded_publishers = [
+    [
       EmbeddedPublisher.new(:field_1 => 3),
       EmbeddedPublisher.new(:field_1 => 4, :more_embedded_publisher => more_embedded_publisher)
     ]
-
-    PublisherModel.create!(:embedded_publishers => embedded_publishers)
   end
+
+  let!(:parent_model) { PublisherModel.create!(:embedded_publishers => embedded_publishers) }
 
   context 'when a parent record is created or updated' do
     it 'creates a new table for each new collection of embedded docs' do
@@ -44,8 +44,6 @@ describe Promiscuous::BlackHole do
     end
 
     it 'persists the right data' do
-      parent_model = PublisherModel.first
-
       eventually do
         expect(DB[:embedded_publishers].to_a).to eq([
           {
@@ -78,8 +76,38 @@ describe Promiscuous::BlackHole do
       end
     end
 
+    it 'does not mark updated embedded docs deleted when in soft delete mode' do
+      Promiscuous::BlackHole::Config.delete_mode = :soft
+      deleted_embedded_id = parent_model.embedded_publishers.second.id
+      parent_model.embedded_publishers = [parent_model.embedded_publishers.first]
+      parent_model.save!
+
+      eventually do
+        expect(DB[:embedded_publishers].to_a).to match_array([
+          {
+            :id => parent_model.embedded_publishers.first.id.to_s,
+            :_v => nil,
+            :_type => "EmbeddedPublisher",
+            :field_1 => 3.0,
+            :embedded_in_id => parent_model.id.to_s,
+            :embedded_in_table => "publisher_models",
+            :_deleted => false
+          },
+          {
+            :id => deleted_embedded_id.to_s,
+            :_v => nil,
+            :_type => "EmbeddedPublisher",
+            :field_1 => 4.0,
+            :embedded_in_id => parent_model.id.to_s,
+            :embedded_in_table => "publisher_models",
+            :_deleted => true
+          }
+        ])
+      end
+    end
+
     it 'removes existing embedded records when the parent record is published' do
-      PublisherModel.first.update_attributes!(:embedded_publishers => [])
+      parent_model.update_attributes!(:embedded_publishers => [])
 
       eventually do
         # create a record not associated with the parent, which should not be
@@ -113,12 +141,26 @@ describe Promiscuous::BlackHole do
   end
 
   context 'when a parent record is deleted' do
-    it 'removes any records embedded in the document' do
-      PublisherModel.first.destroy
+    context 'when configured for hard deletes' do
+      it 'removes any records embedded in the document' do
+        PublisherModel.first.destroy
 
-      eventually do
-        expect(DB[:embedded_publishers].count).to eq(0)
-        expect(DB[:more_embedded_publishers].count).to eq(0)
+        eventually do
+          expect(DB[:embedded_publishers].count).to eq(0)
+          expect(DB[:more_embedded_publishers].count).to eq(0)
+        end
+      end
+    end
+
+    context 'when configured for soft deletes' do
+      it 'marks embedded documents deleted' do
+        Promiscuous::BlackHole::Config.delete_mode = :soft
+        PublisherModel.first.destroy
+
+        eventually do
+          expect(DB[:embedded_publishers].first[:_deleted]).to eq(true)
+          expect(DB[:more_embedded_publishers].first[:_deleted]).to eq(true)
+        end
       end
     end
   end

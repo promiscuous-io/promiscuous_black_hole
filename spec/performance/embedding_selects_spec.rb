@@ -40,6 +40,6 @@ describe Promiscuous::BlackHole do
 
     m.update_attributes(:embedded_publishers => [EmbeddedPublisher.new])
     sleep 5
-    p $calls
+    expect($calls < 5).to eq(true)
   end
 end

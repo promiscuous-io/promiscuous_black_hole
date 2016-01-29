@@ -33,7 +33,8 @@ def reload_configuration
 
   Promiscuous::BlackHole::Config.configure do |config|
     config.connection_args = { database: DATABASE }
-    config.subscriptions   = :__all__
+    config.subscriptions = :__all__
+    config.delete_mode = :hard
     config.schema_generator = -> { "public" }
   end
 end
