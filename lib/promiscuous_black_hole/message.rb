@@ -27,7 +27,7 @@ module Promiscuous::BlackHole
         .gsub(/::Base$/, '')
         .gsub(/::/, '_')
         .underscore
-        .pluralize
+        .pluralize[0...DB.max_identifier_length]
     end
 
     def base_type

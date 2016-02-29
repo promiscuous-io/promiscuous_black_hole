@@ -16,6 +16,11 @@ module Promiscuous::BlackHole
       fetch('show search_path').first[:search_path]
     end
 
+    def self.max_identifier_length
+      @max_identifier_length ||=
+        fetch('show max_identifier_length').first[:max_identifier_length].to_i - 1
+    end
+
     def self.schema_exists?(schema)
       exists = connection[<<-sql]
         SELECT EXISTS (
