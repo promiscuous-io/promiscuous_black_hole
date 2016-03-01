@@ -26,7 +26,7 @@ describe Promiscuous::BlackHole do
     model.create!(:a => 1)
     model.create!(:a => 2)
 
-    expected_table_name = long_table_name.downcase[0...max_identifier_length - 1]
+    expected_table_name = long_table_name.downcase[0...max_identifier_length - 2]
 
     sleep 0.2
 

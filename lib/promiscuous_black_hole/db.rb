@@ -18,7 +18,7 @@ module Promiscuous::BlackHole
 
     def self.max_identifier_length
       @max_identifier_length ||=
-        fetch('show max_identifier_length').first[:max_identifier_length].to_i - 1
+        fetch('show max_identifier_length').first[:max_identifier_length].to_i - 2
     end
 
     def self.schema_exists?(schema)
